@@ -9,29 +9,55 @@
     }
 }
 
-{$SERVER_NAME}
+{$SERVER_NAME} {
 
-log
+  log
 
-route {
-    root * /srv/app/public
-    mercure {
-        # Transport to use (default to Bolt)
-        transport_url {$MERCURE_TRANSPORT_URL:bolt:///data/mercure.db}
-        # Publisher JWT key
-        publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
-        # Subscriber JWT key
-        subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
-        # Allow anonymous subscribers (double-check that it's what you want)
-        anonymous
-        # Enable the subscription API (double-check that it's what you want)
-        subscriptions
-        # Extra directives
-        {$MERCURE_EXTRA_DIRECTIVES}
-    }
-    vulcain
+  route {
+      root * /srv/app/public
+      mercure {
+          # Transport to use (default to Bolt)
+          transport_url {$MERCURE_TRANSPORT_URL:bolt:///data/mercure.db}
+          # Publisher JWT key
+          publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+          # Subscriber JWT key
+          subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+          # Allow anonymous subscribers (double-check that it's what you want)
+          anonymous
+          # Enable the subscription API (double-check that it's what you want)
+          subscriptions
+          # Extra directives
+          {$MERCURE_EXTRA_DIRECTIVES}
+      }
+      vulcain
+      push
+      php_fastcgi unix//var/run/php/php-fpm.sock
+      encode zstd gzip
+      file_server
+  }
+}
+
+{$SERVER_NAME_PHPMYADMIN} {
+    # Enable access logging (to the console)
+    log
+
+    # Set this path to your site's directory.
+    root * /var/www/html
+
+    # Encodes responses using Gzip compression
+    encode gzip
+
+    # Use Caddy's internal, locally-trusted CA to produce certificates for this site.
+    tls internal
+
+    # Push content to the client using HTTP/2 server push
     push
-    php_fastcgi unix//var/run/php/php-fpm.sock
-    encode zstd gzip
+
+    # Enable the static file server.
     file_server
+
+    reverse_proxy phpmyadmin:80
+
+    # Refer to the Caddy docs for more information:
+    # https://caddyserver.com/docs/caddyfile
 }
