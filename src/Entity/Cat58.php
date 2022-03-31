@@ -32,7 +32,7 @@ class Cat58
     private $name;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
-    private $level;
+    private $lvl;
 
     #[ORM\Column(type: 'text')]
     private $detail;
@@ -57,14 +57,14 @@ class Cat58
         return $this;
     }
 
-    public function getLevel(): ?int
+    public function getLvl(): ?int
     {
-        return $this->level;
+        return $this->lvl;
     }
 
-    public function setLevel(?int $level): self
+    public function setLvl(?int $lvl): self
     {
-        $this->level = $level;
+        $this->lvl = $lvl;
 
         return $this;
     }
